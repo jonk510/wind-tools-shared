@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=61"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "wind-tools-shared"
@@ -14,6 +14,11 @@ dependencies = [
     "pyproj",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["shared*"]
+# The module files live at the repo root, but tools import them as `shared.*`
+# (e.g. `from shared.geo_loaders import ...`). Map the root dir to the `shared`
+# package so pip installs an importable top-level `shared` package.
+[tool.setuptools]
+packages = ["shared"]
+
+[tool.setuptools.package-dir]
+shared = "."
