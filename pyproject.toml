@@ -18,7 +18,7 @@ dependencies = [
 # (e.g. `from shared.geo_loaders import ...`). Map the root dir to the `shared`
 # package so pip installs an importable top-level `shared` package.
 [tool.setuptools]
-packages = ["shared"]
+packages = ["shared", "shared.fulcrum"]
 
 [tool.setuptools.package-dir]
 shared = "."
