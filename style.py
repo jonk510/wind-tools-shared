@@ -35,6 +35,19 @@ html, body, [class*="css"] {{
     font-family: {_FONT} !important;
     -webkit-font-smoothing: antialiased;
 }}
+/* Safety net: force the dark background + base text colour even if a tool's
+   .streamlit/config.toml is missing or set to a light theme. This prevents the
+   "white background / black-on-black text" problem when the foundation theme
+   is absent. The native config.toml theme is still preferred (no render flash). */
+[data-testid="stAppViewContainer"], .stApp {{
+    background-color: {_BG_DARK} !important;
+}}
+[data-testid="stHeader"] {{
+    background: transparent !important;
+}}
+.stApp, [data-testid="stAppViewContainer"] {{
+    color: {_TEXT_MAIN};
+}}
 .main .block-container {{
     padding-top: 1.8rem;
     padding-bottom: 4rem;
