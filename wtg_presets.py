@@ -18,6 +18,7 @@ import pandas as pd
 import streamlit as st
 
 _DATA_DIR = Path(__file__).parent / "data"
+_OCTAVE_SET = {63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0}
 
 
 @st.cache_data(show_spinner=False)
@@ -55,7 +56,6 @@ def load_wtg_presets(spectra_file: str | None = None) -> dict:
             if df.empty:
                 continue
             data = {float(r[freq_col]): float(r[lw_col]) for _, r in df.iterrows()}
-            _OCTAVE_SET = {63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0}
             is_third = any(f not in _OCTAVE_SET for f in data.keys())
             name = (
                 sheet.replace("_1-3oct", "")

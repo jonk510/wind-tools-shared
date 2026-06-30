@@ -220,6 +220,32 @@ def page_header(title: str, subtitle: str = "") -> None:
     )
 
 
+def plotly_dark_layout(**kwargs) -> dict:
+    """Return a Plotly layout dict styled to match the dark terminal-green theme.
+
+    Pass to fig.update_layout(**plotly_dark_layout()) or merge into go.Layout().
+    Any keyword args override the defaults.
+
+    Example
+    -------
+    fig = go.Figure(...)
+    fig.update_layout(**plotly_dark_layout(title="Wind Speed Distribution"))
+    """
+    defaults = dict(
+        template="plotly_dark",
+        paper_bgcolor=_BG_DARK,
+        plot_bgcolor=_BG_CARD,
+        font=dict(family="Courier New, monospace", color=_TEXT_MAIN),
+        title_font=dict(color=_GREEN, family="Courier New, monospace"),
+        legend=dict(bgcolor=_BG_CARD, bordercolor=_BORDER, borderwidth=1),
+        xaxis=dict(gridcolor=_BORDER, linecolor=_BORDER, tickfont=dict(color=_GREEN_DIM)),
+        yaxis=dict(gridcolor=_BORDER, linecolor=_BORDER, tickfont=dict(color=_GREEN_DIM)),
+        colorway=[_GREEN, _GREEN_LIGHT, _GREEN_DIM, _GREEN_MUTED, "#22C55E", "#16A34A"],
+    )
+    defaults.update(kwargs)
+    return defaults
+
+
 def kpi_card(value: str, unit: str, label: str) -> str:
     """Return HTML for a KPI card (pass to st.markdown with unsafe_allow_html=True).
 
