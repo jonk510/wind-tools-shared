@@ -1,33 +1,49 @@
 """
-Shared WTG acoustic spectra preset loader.
+Shared WTG data loaders.
 
-load_wtg_presets(spectra_file)
-    Reads an Excel workbook where each sheet is one WTG model.
+load_power_curves()
+    Reads the bundled power_curves.xlsx.
+    Returns DataFrame[WTG → kW] indexed by wind speed (m/s), or None if missing.
+
+load_wtg_presets()
+    Reads the bundled WTG acoustic spectra workbook (one sheet per WTG model).
     Returns {display_name: (data_dict {freq_Hz: Lwa_dB}, is_third_octave)}.
-
-The caller passes the path to their own copy of the Excel file so this module
-stays independent of any single tool's directory layout.
+    Pass spectra_file to override with a custom path.
 """
 
 import os
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
+_DATA_DIR = Path(__file__).parent / "data"
+
 
 @st.cache_data(show_spinner=False)
-def load_wtg_presets(spectra_file: str) -> dict:
+def load_power_curves() -> pd.DataFrame | None:
+    """Return DataFrame[WTG → kW] indexed by wind speed (m/s), or None if file missing."""
+    p = _DATA_DIR / "power_curves.xlsx"
+    if not p.exists():
+        return None
+    df = pd.read_excel(p, index_col=0, header=0)
+    df.index = df.index.astype(float)
+    df.columns = [str(c).strip() for c in df.columns]
+    return df.sort_index()
+
+
+@st.cache_data(show_spinner=False)
+def load_wtg_presets(spectra_file: str | None = None) -> dict:
     """Return {display_name: (data_dict {freq: Lwa_dB}, is_third_oct)}.
 
-    Parameters
-    ----------
-    spectra_file : str
-        Absolute path to the WTG acoustic spectra Excel workbook.
+    Uses the bundled WTG_Acoustic_Spectra_Loudest_Modes workbook by default.
+    Pass spectra_file to override with a custom path.
     """
-    if not os.path.exists(spectra_file):
+    path = spectra_file or str(_DATA_DIR / "WTG_Acoustic_Spectra_Loudest_Modes 1.xlsx")
+    if not os.path.exists(path):
         return {}
     try:
-        xl = pd.ExcelFile(spectra_file)
+        xl = pd.ExcelFile(path)
         presets = {}
         for sheet in xl.sheet_names:
             df = xl.parse(sheet)

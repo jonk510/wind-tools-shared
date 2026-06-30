@@ -22,3 +22,6 @@ packages = ["shared", "shared.fulcrum"]
 
 [tool.setuptools.package-dir]
 shared = "."
+
+[tool.setuptools.package-data]
+shared = ["data/*.xlsx"]
