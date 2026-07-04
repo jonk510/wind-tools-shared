@@ -21,7 +21,9 @@ except ImportError:
     _HAS_DEPS = False
 
 
-@st.cache_data(show_spinner=False)
+# SRTM terrain is static, so cache for 30 days; max_entries bounds memory when a
+# session downloads many sites (each entry is a full elevation grid).
+@st.cache_data(show_spinner=False, ttl=30 * 86400, max_entries=64)
 def fetch_srtm_elevation(
     wtg_xy: np.ndarray,
     epsg_code: int,
@@ -79,11 +81,18 @@ def fetch_srtm_elevation(
         locations = "|".join(
             f"{lat:.6f},{lon:.6f}" for lat, lon in zip(batch_lats, batch_lons)
         )
-        resp = requests.get(
-            f"https://api.opentopodata.org/v1/srtm30m?locations={locations}",
-            timeout=30,
-        )
-        resp.raise_for_status()
+        url = f"https://api.opentopodata.org/v1/srtm30m?locations={locations}"
+        # Retry once — a large grid makes many sequential free-tier requests, so
+        # one transient hiccup shouldn't abort the whole download.
+        for attempt in range(2):
+            try:
+                resp = requests.get(url, timeout=30)
+                resp.raise_for_status()
+                break
+            except Exception:
+                if attempt == 1:
+                    raise
+                time.sleep(2.0)
         for r in resp.json()["results"]:
             elev = r.get("elevation")
             elevations.append(float(elev) if elev is not None else 0.0)
@@ -95,7 +104,7 @@ def fetch_srtm_elevation(
     )
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=30 * 86400, max_entries=512)
 def fetch_point_elevation(lat: float, lon: float) -> int:
     """Return SRTM 30 m elevation (metres) for a single WGS84 lat/lon.
 
