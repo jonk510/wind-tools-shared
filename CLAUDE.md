@@ -2,7 +2,8 @@
 
 Shared library backing all the wind/solar Streamlit tools. Installed by each
 tool via a pinned `git+https://…wind-tools-shared.git@<commit>` in its
-`requirements.txt`. **Current pin: `6227f2f`.**
+`requirements.txt`. **Current pin: `34564f3`** (the 3 windpro/noise tools;
+the other 5 remote tools remain on `6227f2f` — repin lazily when next touched).
 
 ## Modules
 - `style.py` — `apply_theme()`, `page_header()`, `plotly_dark_layout()` (the
@@ -14,6 +15,15 @@ tool via a pinned `git+https://…wind-tools-shared.git@<commit>` in its
 - `geo_loaders.py` — shapefile / KMZ point loaders.
 - `epsg_selector.py` — Streamlit EPSG picker with MGA presets.
 - `wtg_presets.py` — power curves + WTG acoustic spectra (from `data/*.xlsx`).
+- `acoustics.py` — ISO 9613-2 noise engine (octave-band SPL, ground effect,
+  optional §8 terrain shielding, 4-panel plot). Single source for the noise
+  tool + windpro_park_noise_summary (each keeps a thin re-export shim named
+  `wind_noise_analyser.py`). `fetch_srtm_elevation` lives in `srtm.py`, not here.
+- `windpro_park.py` — WindPRO PARK-summary engine (PDF extraction, matplotlib
+  maps/charts, python-pptx `build()`, CLI `main(folder=...)`). Superset with
+  noise-overlay code import-guarded via `HAS_NOISE` (imports `acoustics`+`srtm`),
+  so the noise-less results_summary tool imports it without acoustics deps. Both
+  windpro tools keep a thin `park_summary.py` shim.
 - `fulcrum/` — Fulcrum3D SODAR/FlightDECK loader subpackage.
 - `tests/self_check.py` — offline checks for the pure-logic helpers.
 
@@ -33,4 +43,11 @@ tool via a pinned `git+https://…wind-tools-shared.git@<commit>` in its
 ## Deploy workflow (changing shared)
 1. Commit + push shared. 2. Repin each dependent's `requirements.txt` to the new
 commit. 3. Commit + push each dependent (Streamlit Cloud re-clones HEAD of the
-pinned URL). The 8 remote tools are currently all on `6227f2f`.
+pinned URL). The 3 windpro/noise tools are on `34564f3`; the other 5 remote
+tools remain on `6227f2f` (repin lazily when next touched).
+
+## Modules with root-level .py (packaging note)
+New single-file modules (e.g. `acoustics.py`, `windpro_park.py`) at the repo
+root are auto-included in the `shared` package via `package-dir shared="."` — no
+`packages` edit needed (that list is only for sub*packages* like `fulcrum`).
+Adding acoustics pulled `scipy`+`matplotlib` into shared's install deps.
