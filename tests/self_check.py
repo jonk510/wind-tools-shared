@@ -123,6 +123,21 @@ def _():
     assert callable(third_oct_to_octave)
 
 
+@check("windpro_park: engine imports and builds a cover-only deck")
+def _():
+    from shared.windpro_park import (
+        DEFAULT_LOSSES, _ordinal, _min_spacing_d, apply_losses, build,
+    )
+    assert _ordinal(1) == "1st" and _ordinal(12) == "12th"
+    # multiplicative loss chain (park_yield → p50); None losses skipped
+    d = {"park_yield_mwh": 1000.0}
+    apply_losses(d, {"Availability loss [%]": 10.0, "Electrical loss [%]": None})
+    assert abs(d["p50_aep_mwh"] - 900.0) < 1e-9
+    # zero-PDF build must not crash (cover-only deck), returns PPTX bytes
+    data = build([], template_path=None, cover_title="T", cover_subtitle="S")
+    assert isinstance(data, (bytes, bytearray)) and data[:2] == b"PK"
+
+
 print()
 if FAILURES:
     print(f"{len(FAILURES)} check(s) FAILED: {', '.join(FAILURES)}")
