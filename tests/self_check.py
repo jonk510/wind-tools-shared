@@ -100,6 +100,29 @@ def _():
     from shared.fulcrum import load_fulcrum_wind, wind_speed_series  # noqa: F401
 
 
+@check("acoustics: engine imports and basic ISO 9613-2 sanity")
+def _():
+    import numpy as np
+    from shared.acoustics import (
+        OCTAVE_BANDS, overall_lwa, third_oct_to_octave, compute_noise_grid,
+    )
+    assert len(OCTAVE_BANDS) == 8
+    # flat 100 dB across 8 octave bands → overall Lw,A well above any band
+    lw = {f: 100.0 for f in OCTAVE_BANDS}
+    assert 100.0 < overall_lwa(lw) < 115.0
+    # 0.0 band entries are no-data, must not inject phantom energy
+    lw0 = {**lw, 63: 0.0}
+    assert overall_lwa(lw0) <= overall_lwa(lw)
+    # tiny grid run: one turbine, flat terrain, finite output
+    xi = np.linspace(-500.0, 500.0, 5)
+    xx, yy = np.meshgrid(xi, xi)
+    grid = compute_noise_grid(
+        np.array([[0.0, 0.0]]), np.array([0.0]), lw, 100.0,
+        xx, yy, np.zeros_like(xx))
+    assert np.all(np.isfinite(grid))
+    assert callable(third_oct_to_octave)
+
+
 print()
 if FAILURES:
     print(f"{len(FAILURES)} check(s) FAILED: {', '.join(FAILURES)}")

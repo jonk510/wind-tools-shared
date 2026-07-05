@@ -12,6 +12,8 @@ dependencies = [
     "pandas",
     "requests",
     "pyproj",
+    "scipy",
+    "matplotlib",
 ]
 
 # The module files live at the repo root, but tools import them as `shared.*`
