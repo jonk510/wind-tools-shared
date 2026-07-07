@@ -3,7 +3,8 @@
 Shared library backing all the wind/solar Streamlit tools. Installed by each
 tool via a pinned `git+https://…wind-tools-shared.git@<commit>` in its
 `requirements.txt`. **Current pin: `34564f3`** (the 3 windpro/noise tools;
-the other 5 remote tools remain on `6227f2f` — repin lazily when next touched).
+era5_gwa_wind_tool is on `ec673fc` (report_style); the other remote tools
+remain on `6227f2f`/`ac91265` — repin lazily when next touched).
 
 ## Modules
 - `style.py` — `apply_theme()`, `page_header()`, `plotly_dark_layout()` (the
