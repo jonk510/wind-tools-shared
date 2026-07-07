@@ -66,8 +66,10 @@ def _():
         return  # optional dependency absent — skip
     assert get_timezone(-31.95, 115.86) == "Australia/Perth"
     assert get_timezone(-34.93, 138.60) == "Australia/Adelaide"
-    # Mid-Atlantic (no land timezone) → fallback
-    assert get_timezone(0.0, -30.0, fallback="UTC") == "UTC"
+    # Mid-Atlantic: timezonefinder ≥6 covers oceans with Etc/GMT± zones;
+    # older versions return None and the wrapper falls back. Accept either.
+    tz = get_timezone(0.0, -30.0, fallback="UTC")
+    assert tz == "UTC" or tz.startswith("Etc/GMT"), tz
 
 
 @check("epsg_selector: MGA presets are valid, distinct EPSG codes")

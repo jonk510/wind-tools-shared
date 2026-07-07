@@ -7,7 +7,16 @@ the other 5 remote tools remain on `6227f2f` — repin lazily when next touched)
 
 ## Modules
 - `style.py` — `apply_theme()`, `page_header()`, `plotly_dark_layout()` (the
-  dark terminal-green brand; single source of the component CSS).
+  dark terminal-green brand; single source of the on-screen Streamlit CSS).
+- `report_style.py` — **single source of the PDF *report* look** (print sibling
+  of `style.py`): deep-pine + emerald palette tokens (`PINE`, `GREEN`, …), page
+  geometry (`A4_PORTRAIT`/`A4_LANDSCAPE`, `MARGIN_L`/`CONTENT_W`), `RCPARAMS`, and
+  orientation-agnostic layout primitives (`page_chrome`, `section_band`,
+  `h1`/`h2`, `para`, `bullet`, `equation`, `render_table`, `chart_style`). Each
+  report-producing tool composes its pages from these and passes in its own text
+  (disclaimer, section titles). Change a colour / rule / font here and every
+  tool's next-built PDF follows. Used by `era5_gwa_wind_tool/report_gen.py` and
+  `solar_analysis_output/app.py` (`_build_pdf`).
 - `srtm.py` — `fetch_srtm_elevation`, `fetch_point_elevation` (OpenTopoData;
   bounded caches + per-batch retry).
 - `timezone_lookup.py` — `get_timezone(lat, lon)` (TimezoneFinder wrapper).
